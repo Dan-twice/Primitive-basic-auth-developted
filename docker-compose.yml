@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres
+    # hostname: db
+    container_name: goPSQL
+    environment:
+      POSTGRES_DB: "newdb"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
+      # POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      # POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      # PGDATA: /data/postgres
+    volumes:
+      - .:/docker-entrypoint-initdb.d
+      # - roach:/cockroach/cockroach-data
+      # storage of db
+      # - ./pgdata:/var/lib/postgresql/data
+      # - postgres:/data/postgres
+    ports:
+      - "5438:5432"
+    networks:
+      - postnet
+  app:
+    build: ../basic-auth-sys
+    ports:
+     - 4000:4000
+    depends_on:
+     - db
+    environment:
+     - PGUSER=${PGUSER:-postgres}
+     - PGPASSWORD=${PGPASSWORD:-password}
+     - PGHOST=${PGHOST:-db}
+     - PGPORT=${PGPORT:-5432}
+     - PGDATABASE=${PGDATABASE-newdb}
+    networks:
+      - postnet
+    # command: ["wait-for-it.sh", "db:5432", "--", "./EXECUTABLE"]
+networks:
+  postnet:
+    name: postnet
+    external: true
+
+# healthcheck:
+#   test: ["CMD-SHELL", "pg_isready -U habrpguser -d habrdb"]
+#   interval: 10s
+#   timeout: 5s
+#   retries: 5
+#   start_period: 10s
+# restart: unless-stopped
+# deploy:
+#   resources:
+#     limits:
+#       cpus: '1'
+#       memory: 4G
