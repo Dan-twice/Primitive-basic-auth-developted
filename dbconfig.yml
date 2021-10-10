@@ -1,0 +1,4 @@
+development:
+    dialect: postgres
+    datasource: port=5432 dbname=newdb user=postgres password=password sslmode=disable
+    dir: migrations/
